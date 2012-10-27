@@ -22,13 +22,7 @@ import dagger.internal.Binding;
 import dagger.internal.Linker;
 import dagger.internal.ModuleAdapter;
 import dagger.internal.SetBinding;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -44,6 +38,13 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static dagger.internal.plugins.loading.ClassloadingPlugin.MODULE_ADAPTER_SUFFIX;
 import static java.lang.reflect.Modifier.FINAL;
@@ -232,8 +233,19 @@ public final class ProvidesProcessor extends AbstractProcessor {
     writer.close();
   }
 
+  private String stringifyParameters(ExecutableElement providerMethod) {
+    StringBuilder stringBuilder = new StringBuilder();
+    for (VariableElement variableElement : providerMethod.getParameters()) {
+      stringBuilder.append(variableElement.asType().toString().replace(".", "_"));
+      stringBuilder.append("_");
+      stringBuilder.append(variableElement.getSimpleName());
+      stringBuilder.append("_");
+    }
+    return stringBuilder.toString();
+  }
+
   private String bindingClassName(ExecutableElement providerMethod) {
-    String methodName = providerMethod.getSimpleName().toString();
+    String methodName = providerMethod.getSimpleName().toString() + stringifyParameters(providerMethod);
     String uppercaseMethodName = Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
     String className = uppercaseMethodName + "Binding";
     return className;
