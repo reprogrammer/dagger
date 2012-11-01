@@ -30,6 +30,7 @@ import dagger.internal.plugins.loading.ClassloadingPlugin;
 import dagger.internal.plugins.reflect.ReflectivePlugin;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import checkers.nullness.quals.*;
 
 import static dagger.internal.RuntimeAggregatingPlugin.getAllModuleAdapters;
 
@@ -61,16 +62,16 @@ import static dagger.internal.RuntimeAggregatingPlugin.getAllModuleAdapters;
  * </ul>
  */
 public final class ObjectGraph {
-  private final ObjectGraph base;
+  private final @Nullable ObjectGraph base;
   private final Linker linker;
-  private final Map<Class<?>, StaticInjection> staticInjections;
+  private final Map<Class<?>, /*@Nullable*/ StaticInjection> staticInjections;
   private final Map<String, Class<?>> entryPoints;
   private final Plugin plugin;
 
-  ObjectGraph(ObjectGraph base,
+  ObjectGraph(@Nullable ObjectGraph base,
       Linker linker,
       Plugin plugin,
-      Map<Class<?>, StaticInjection> staticInjections,
+      Map<Class<?>, /*@Nullable*/ StaticInjection> staticInjections,
       Map<String, Class<?>> entryPoints) {
     if (linker == null) throw new NullPointerException("linker");
     if (plugin == null) throw new NullPointerException("plugin");
@@ -103,10 +104,10 @@ public final class ObjectGraph {
     return makeGraph(null, plugin, modules);
   }
 
-  private static ObjectGraph makeGraph(ObjectGraph base, Plugin plugin, Object... modules) {
+  private static ObjectGraph makeGraph(@Nullable ObjectGraph base, Plugin plugin, Object... modules) {
     Map<String, Class<?>> entryPoints = new LinkedHashMap<String, Class<?>>();
-    Map<Class<?>, StaticInjection> staticInjections
-        = new LinkedHashMap<Class<?>, StaticInjection>();
+    Map<Class<?>, /*@Nullable*/ StaticInjection> staticInjections
+        = new LinkedHashMap<Class<?>, /*@Nullable*/ StaticInjection>();
 
     // Extract bindings in the 'base' and 'overrides' set. Within each set no
     // duplicates are permitted.
@@ -152,7 +153,7 @@ public final class ObjectGraph {
 
 
   private void linkStaticInjections() {
-    for (Map.Entry<Class<?>, StaticInjection> entry : staticInjections.entrySet()) {
+    for (Map.Entry<Class<?>, /*@Nullable*/ StaticInjection> entry : staticInjections.entrySet()) {
       StaticInjection staticInjection = entry.getValue();
       if (staticInjection == null) {
         staticInjection = plugin.getStaticInjection(entry.getKey());
@@ -195,8 +196,10 @@ public final class ObjectGraph {
     linker.linkRequested();
     linkStaticInjections();
 
-    for (Map.Entry<Class<?>, StaticInjection> entry : staticInjections.entrySet()) {
-      entry.getValue().inject();
+    for (Map.Entry<Class<?>, /*@Nullable*/ StaticInjection> entry : staticInjections.entrySet()) {
+      @Nullable StaticInjection staticInjection = entry.getValue();
+      assert staticInjection != null : "@SuppressWarnings(nullness)";
+      staticInjection.inject();
     }
   }
 
@@ -209,7 +212,8 @@ public final class ObjectGraph {
   public <T> T get(Class<T> type) {
     String key = Keys.get(type);
     @SuppressWarnings("unchecked") // The linker matches keys to bindings by their type.
-    Binding<T> binding = (Binding<T>) getEntryPointBinding(key, key);
+    @Nullable Binding<T> binding = (/*@Nullable*/ Binding<T>) getEntryPointBinding(key, key);
+    assert binding != null : "@SuppressWarnings(nullness)";
     return binding.get();
   }
 
@@ -224,7 +228,8 @@ public final class ObjectGraph {
     String entryPointKey = Keys.get(instance.getClass());
     String membersKey = Keys.getMembersKey(instance.getClass());
     @SuppressWarnings("unchecked") // The linker matches keys to bindings by their type.
-    Binding<Object> binding = (Binding<Object>) getEntryPointBinding(entryPointKey, membersKey);
+    @Nullable Binding<Object> binding = (/*@Nullable*/ Binding<Object>) getEntryPointBinding(entryPointKey, membersKey);
+    assert binding != null : "@SuppressWarnings(nullness)";
     binding.injectMembers(instance);
   }
 
@@ -234,7 +239,7 @@ public final class ObjectGraph {
    * @param key the key to use when retrieving the binding. This may be a
    *     regular (provider) key or a members key.
    */
-  private Binding<?> getEntryPointBinding(String entryPointKey, String key) {
+  private @Nullable Binding<?> getEntryPointBinding(String entryPointKey, String key) {
     Class<?> moduleClass = null;
     for (ObjectGraph graph = this; graph != null; graph = graph.base) {
       moduleClass = graph.entryPoints.get(entryPointKey);

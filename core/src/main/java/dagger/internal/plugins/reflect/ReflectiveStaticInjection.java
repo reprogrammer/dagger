@@ -21,12 +21,14 @@ import dagger.internal.Linker;
 import dagger.internal.StaticInjection;
 import java.lang.reflect.Field;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Uses reflection to inject the static fields of a class.
  */
 final class ReflectiveStaticInjection extends StaticInjection {
   private final Field[] fields;
-  private Binding<?>[] bindings;
+  private @Nullable Binding<?>[] bindings;
 
   public ReflectiveStaticInjection(Field[] fields) {
     this.fields = fields;
@@ -44,6 +46,7 @@ final class ReflectiveStaticInjection extends StaticInjection {
   @Override public void inject() {
     try {
       for (int f = 0; f < fields.length; f++) {
+    	assert bindings[f] != null : "@SuppressWarnings(nullness)";
         fields[f].set(null, bindings[f].get());
       }
     } catch (IllegalAccessException e) {

@@ -15,6 +15,8 @@
  */
 package dagger.internal;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Provides a point of configuration of the basic resolving functions within Dagger, namely
  * that of Module handling, injection binding creation, and static injection.  A plugin must
@@ -29,7 +31,7 @@ public interface Plugin {
   /**
    * Returns a module adapter for {@code module}.
    */
-  <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, T module);
+  <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, @Nullable T module);
 
   /**
    * Returns the static injection for {@code injectedClass}.

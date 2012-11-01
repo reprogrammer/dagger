@@ -17,14 +17,16 @@ package dagger.internal;
 
 import java.util.Set;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Injects a Provider or a MembersInjector.
  */
 final class BuiltInBinding<T> extends Binding<T> {
   private final String delegateKey;
-  private Binding<?> delegate;
+  private @Nullable Binding<?> delegate;
 
-  public BuiltInBinding(String key, Object requiredBy, String delegateKey) {
+  public BuiltInBinding(String key, @Nullable Object requiredBy, String delegateKey) {
     super(key, null, false, requiredBy);
     this.delegateKey = delegateKey;
   }
@@ -39,10 +41,11 @@ final class BuiltInBinding<T> extends Binding<T> {
 
   @SuppressWarnings("unchecked") // At runtime we know 'T' is a Provider or MembersInjector.
   @Override public T get() {
+	assert delegate != null : "@SuppressWarnings(nullness)";
     return (T) delegate;
   }
 
-  public Binding<?> getDelegate() {
+  public @Nullable Binding<?> getDelegate() {
     return delegate;
   }
 

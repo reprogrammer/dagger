@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Uses reflection to create bindings, module adapters and static injections.
  */
@@ -42,7 +44,7 @@ public final class ReflectivePlugin implements Plugin {
   }
 
   @SuppressWarnings("unchecked") // Runtime checks validate that the result type matches 'T'.
-  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, T module) {
+  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, @Nullable T module) {
     Module annotation = moduleClass.getAnnotation(Module.class);
     if (annotation == null) {
       throw new IllegalArgumentException("No @Module on " + moduleClass.getName());

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Links bindings to their dependencies.
  */
@@ -34,7 +36,7 @@ public final class Linker {
    * otherwise satisfiable from this {@code Linker}. The top-most {@code Linker}
    * in a chain will have a null base linker.
    */
-  private final Linker base;
+  private final @Nullable Linker base;
 
   /** Bindings requiring a call to attach(). May contain deferred bindings. */
   private final Queue<Binding<?>> toLink = new LinkedList<Binding<?>>();
@@ -52,7 +54,7 @@ public final class Linker {
 
   private final ErrorHandler errorHandler;
 
-  public Linker(Linker base, Plugin plugin, ErrorHandler errorHandler) {
+  public Linker(@Nullable Linker base, Plugin plugin, ErrorHandler errorHandler) {
     if (plugin == null) throw new NullPointerException("plugin");
     if (errorHandler == null) throw new NullPointerException("errorHandler");
 
@@ -147,7 +149,7 @@ public final class Linker {
    *   <li>Injections of other types will use the injectable constructors of those classes.
    * </ul>
    */
-  private Binding<?> createJitBinding(String key, Object requiredBy, boolean mustBeInjectable)
+  private Binding<?> createJitBinding(String key, @Nullable Object requiredBy, boolean mustBeInjectable)
       throws ClassNotFoundException {
     String builtInBindingsKey = Keys.getBuiltInBindingsKey(key);
     if (builtInBindingsKey != null) {
@@ -175,7 +177,7 @@ public final class Linker {
    * null. If the returned binding didn't exist or was unlinked, it will be
    * enqueued to be linked.
    */
-  public Binding<?> requestBinding(String key, Object requiredBy) {
+  public @Nullable Binding<?> requestBinding(String key, @Nullable Object requiredBy) {
     return requestBinding(key, true, requiredBy);
   }
 
@@ -185,11 +187,11 @@ public final class Linker {
    * inject arbitrary entry points (like JUnit test cases or Android activities)
    * without concern for whether the specific entry point is injectable.
    */
-  public Binding<?> requestEntryPoint(String key, Class<?> requiredByModule) {
+  public @Nullable Binding<?> requestEntryPoint(String key, Class<?> requiredByModule) {
     return requestBinding(key, false, requiredByModule);
   }
 
-  private Binding<?> requestBinding(String key, boolean mustBeInjectable, Object requiredBy) {
+  private @Nullable Binding<?> requestBinding(String key, boolean mustBeInjectable, @Nullable Object requiredBy) {
     Binding<?> binding = null;
     for (Linker linker = this; linker != null; linker = linker.base) {
       binding = linker.bindings.get(key);
@@ -244,7 +246,7 @@ public final class Linker {
    * key} already exists.
    */
   private <K, V> void putIfAbsent(Map<K, V> map, K key, V value) {
-    V replaced = map.put(key, value); // Optimistic: prefer only one hash operation lookup.
+    @Nullable V replaced = map.put(key, value); // Optimistic: prefer only one hash operation lookup.
     if (replaced != null) {
       map.put(key, replaced);
     }
@@ -308,7 +310,7 @@ public final class Linker {
   private static class DeferredBinding extends Binding<Object> {
     final String deferredKey;
     final boolean mustBeInjectable;
-    private DeferredBinding(String deferredKey, Object requiredBy, boolean mustBeInjectable) {
+    private DeferredBinding(String deferredKey, @Nullable Object requiredBy, boolean mustBeInjectable) {
       super(null, null, false, requiredBy);
       this.deferredKey = deferredKey;
       this.mustBeInjectable = mustBeInjectable;

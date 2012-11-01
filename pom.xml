@@ -45,9 +45,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Compilation -->
-    <java.version>1.6</java.version>
+    <java.version>1.8</java.version>
     <javax.inject.version>1</javax.inject.version>
     <maven.version>2.0.6</maven.version>
+    <checkers.version>1.4.2</checkers.version>
 
     <!-- Test Dependencies -->
     <junit.version>4.10</junit.version>
@@ -77,6 +78,20 @@
     <url>http://squareup.com</url>
   </organization>
 
+  <repositories>
+    <repository>
+      <id>checker-framework-repo</id>
+      <url>http://types.cs.washington.edu/m2-repo</url>
+    </repository>
+  </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>checker-framework-repo</id>
+      <url>http://types.cs.washington.edu/m2-repo</url>
+    </pluginRepository>
+  </pluginRepositories>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -104,6 +119,11 @@
         <artifactId>fest-assert</artifactId>
         <version>${fest.version}</version>
       </dependency>
+      <dependency>
+        <groupId>types.checkers</groupId>
+        <artifactId>checkers-quals</artifactId>
+        <version>${checkers.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -118,6 +138,8 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <fork>true</fork>
+          <executable>${user.home}/apps/checker-framework/checkers/binary/javac</executable>
         </configuration>
       </plugin>
 
@@ -139,6 +161,58 @@
           </execution>
         </executions>
       </plugin>
+      
+      <plugin>
+        <groupId>types.checkers</groupId>
+        <artifactId>checkersplugin</artifactId>
+        <version>0.2</version>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <processors>
+            <processor>checkers.nullness.NullnessChecker</processor>
+          </processors>
+          <checkersVersion>${checkers.version}</checkersVersion>
+        </configuration>
+      </plugin>
     </plugins>
+    <!--  See http://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
+    <pluginManagement>
+    	<plugins>
+    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+    		<plugin>
+    			<groupId>org.eclipse.m2e</groupId>
+    			<artifactId>lifecycle-mapping</artifactId>
+    			<version>1.0.0</version>
+    			<configuration>
+    				<lifecycleMappingMetadata>
+    					<pluginExecutions>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>types.checkers</groupId>
+    								<artifactId>
+    									checkersplugin
+    								</artifactId>
+    								<versionRange>[0.2,)</versionRange>
+    								<goals>
+    									<goal>check</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
+    					</pluginExecutions>
+    				</lifecycleMappingMetadata>
+    			</configuration>
+    		</plugin>
+    	</plugins>
+    </pluginManagement>
   </build>
 </project>

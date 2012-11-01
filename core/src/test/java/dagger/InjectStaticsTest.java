@@ -19,6 +19,8 @@ import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 
+import checkers.nullness.quals.Nullable;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 public final class InjectStaticsTest {
@@ -28,12 +30,12 @@ public final class InjectStaticsTest {
   }
 
   public static class InjectsOneField {
-    @Inject static String staticField;
+    @Inject static @Nullable String staticField;
   }
 
   public static class InjectsStaticAndNonStatic {
     @Inject Integer nonStaticField;
-    @Inject static String staticField;
+    @Inject static @Nullable String staticField;
   }
 
   @Test public void injectStatics() {

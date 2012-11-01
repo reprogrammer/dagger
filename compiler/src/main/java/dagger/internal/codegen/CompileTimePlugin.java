@@ -23,6 +23,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * A {@code Binding.Resolver} suitable for tool use at build time. The bindings created by
  * this {@code Binding.Resolver} have the correct dependency graph, but do not implement
@@ -54,7 +56,7 @@ public final class CompileTimePlugin implements Plugin {
     return AtInjectBinding.create(type, mustBeInjectable);
   }
 
-  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, T module) {
+  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, @Nullable T module) {
     throw new UnsupportedOperationException();
   }
 

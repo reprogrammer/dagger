@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Singleton;
 
+import checkers.nullness.quals.Nullable;
+
 final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
   final Class<?> moduleClass;
 
@@ -54,9 +56,10 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
   }
 
   @Override public void getBindings(Map<String, Binding<?>> bindings) {
-    for (Class<?> c = moduleClass; c != Object.class; c = c.getSuperclass()) {
+    for (Class<?> c = moduleClass; c != null && c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Provides.class)) {
+          @SuppressWarnings("nullness")
           String key = Keys.get(method.getGenericReturnType(), method.getAnnotations(), method);
           if (method.isAnnotationPresent(OneOf.class)) {
             handleSetBindings(bindings, method, key);
@@ -73,6 +76,7 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
   }
 
   private <T> void handleSetBindings(Map<String, Binding<?>> bindings, Method method, String key) {
+	@SuppressWarnings("nullness")
     String elementKey =
         Keys.getElementKey(method.getGenericReturnType(), method.getAnnotations(), method);
     SetBinding.<T>add(bindings, elementKey, new ProviderMethodBinding<T>(method, key, module));
@@ -98,7 +102,7 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
    * Invokes a method to provide a value. The method's parameters are injected.
    */
   private final class ProviderMethodBinding<T> extends Binding<T> {
-    private Binding<?>[] parameters;
+    private @Nullable Binding<?>[] parameters;
     private final Method method;
     private final Object instance;
 
@@ -123,6 +127,7 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
     @Override public T get() {
       Object[] args = new Object[parameters.length];
       for (int i = 0; i < parameters.length; i++) {
+    	assert parameters[i] != null : "@SuppressWarnings(nullness)";
         args[i] = parameters[i].get();
       }
       try {
@@ -135,7 +140,8 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
     }
 
     @Override public void getDependencies(Set<Binding<?>> get, Set<Binding<?>> injectMembers) {
-      for (Binding<?> binding : parameters) {
+      for (@Nullable Binding<?> binding : parameters) {
+    	assert binding != null : "@SuppressWarnings(nullness)";
         get.add(binding);
       }
     }

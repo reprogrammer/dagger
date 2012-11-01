@@ -102,7 +102,7 @@ public final class ExtensionTest {
     try {
       assertThat(graph.get(clazz)).isNull();
     } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).contains("No entry point");
+      assertThat(e.getMessage() != null && e.getMessage().contains("No entry point"));
     }
   }
 }

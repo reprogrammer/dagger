@@ -19,6 +19,8 @@ package dagger.internal;
 import dagger.Lazy;
 import java.util.Set;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Injects a Lazy wrapper for a type T
  */
@@ -27,9 +29,9 @@ final class LazyBinding<T> extends Binding<Lazy<T>> {
   private final static Object NOT_PRESENT = new Object();
 
   private final String lazyKey;
-  private Binding<T> delegate;
+  private @Nullable Binding<T> delegate;
 
-  public LazyBinding(String key, Object requiredBy, String lazyKey) {
+  public LazyBinding(String key, @Nullable Object requiredBy, String lazyKey) {
     super(key, null, false, requiredBy);
     this.lazyKey = lazyKey;
   }
@@ -37,7 +39,7 @@ final class LazyBinding<T> extends Binding<Lazy<T>> {
   @SuppressWarnings("unchecked") // At runtime we know it's a Binding<Lazy<T>>.
   @Override
   public void attach(Linker linker) {
-    delegate = (Binding<T>) linker.requestBinding(lazyKey, requiredBy);
+    delegate = (/*@Nullable*/ Binding<T>) linker.requestBinding(lazyKey, requiredBy);
   }
 
   @Override public void injectMembers(Lazy<T> t) {
@@ -52,6 +54,7 @@ final class LazyBinding<T> extends Binding<Lazy<T>> {
       @SuppressWarnings("unchecked") // Delegate is of type T
       @Override
       public T get() {
+    	assert delegate != null : "@SuppressWarnings(nullness)";
         return (T) ((cacheValue != NOT_PRESENT) ? cacheValue : (cacheValue = delegate.get()));
       }
     };

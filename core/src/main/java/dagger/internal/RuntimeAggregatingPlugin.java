@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Aggregates provided plugins and delegates its operations to them in order.  Also provides some
  * specific runtime facilities needed by the runtime.
@@ -50,7 +52,7 @@ public final class RuntimeAggregatingPlugin implements Plugin {
     int s = 0;
     for (Object module : seedModules) {
       if (module instanceof Class) {
-        seedAdapters[s++] = plugin.getModuleAdapter((Class<?>) module, null); // Plugin constructs.
+        seedAdapters[s++] = plugin.<Object>getModuleAdapter((Class<?>) module, null); // Plugin constructs.
       } else {
         seedAdapters[s++] = plugin.getModuleAdapter(module.getClass(), module);
       }
@@ -82,7 +84,7 @@ public final class RuntimeAggregatingPlugin implements Plugin {
       Map<Class<?>, ModuleAdapter<?>> result) {
     for (Class<?> include : adapter.includes) {
       if (!result.containsKey(include)) {
-        ModuleAdapter<Object> includedModuleAdapter = plugin.getModuleAdapter(include, null);
+        ModuleAdapter<Object> includedModuleAdapter = plugin.<Object>getModuleAdapter(include, null);
         result.put(include, includedModuleAdapter);
         collectIncludedModulesRecursively(plugin, includedModuleAdapter, result);
       }
@@ -92,10 +94,10 @@ public final class RuntimeAggregatingPlugin implements Plugin {
   /**
    * Obtains a module adapter for {@code module} from the first responding resolver.
    */
-  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, T module) {
+  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, @Nullable T module) {
     for (int i = 0; i < plugins.length; i++) {
       try {
-        ModuleAdapter<T> result = plugins[i].getModuleAdapter(moduleClass, module);
+        ModuleAdapter<T> result = plugins[i].<T>getModuleAdapter(moduleClass, module);
         result.module = (module != null) ? module : result.newModule();
         return result;
       } catch (RuntimeException e) {

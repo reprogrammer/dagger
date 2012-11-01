@@ -18,12 +18,14 @@ package dagger.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * A map that fails when existing values are clobbered.
  */
 public class UniqueMap<K, V> extends LinkedHashMap<K, V> {
-  @Override public V put(K key, V value) {
-    V clobbered = super.put(key, value);
+  @Override public @Nullable V put(K key, V value) {
+    @Nullable V clobbered = super.put(key, value);
     if (clobbered != null) {
       super.put(key, clobbered); // Put things back as they were.
       throw new IllegalArgumentException("Duplicate:\n    " + clobbered + "\n    " + value);

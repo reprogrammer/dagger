@@ -21,6 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+/*>>> import checkers.nullness.quals.*; */
+
 /**
  * A {@code Binding<T>} which contains contributors (other bindings marked with
  * {@code @Provides} {@code @OneOf}), to which it delegates provision
@@ -32,7 +34,9 @@ public final class SetBinding<T> extends Binding<Set<T>> {
     SetBinding<T> elementBinding = (SetBinding<T>) bindings.get(elementKey);
     if (elementBinding == null) {
       elementBinding = new SetBinding<T>(elementKey);
-      bindings.put(elementBinding.provideKey, elementBinding);
+      if (elementBinding.provideKey != null) {
+        bindings.put(elementBinding.provideKey, elementBinding);
+      }
     }
     elementBinding.contributors.add(Linker.scope(binding));
   }

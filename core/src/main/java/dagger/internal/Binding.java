@@ -19,6 +19,8 @@ import dagger.MembersInjector;
 import java.util.Set;
 import javax.inject.Provider;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Injects a value of a specific type.
  */
@@ -42,17 +44,17 @@ public abstract class Binding<T> implements Provider<T>, MembersInjector<T> {
   private static final int CYCLE_FREE = 1 << 3;
 
   /** The key used to provide instances of 'T', or null if this binding cannot provide instances. */
-  public final String provideKey;
+  public final @Nullable String provideKey;
 
   /** The key used to inject members of 'T', or null if this binding cannot inject members. */
-  public final String membersKey;
+  public final @Nullable String membersKey;
 
   /** Bitfield of states like SINGLETON and LINKED. */
   private int bits;
 
-  public final Object requiredBy;
+  public final @Nullable Object requiredBy;
 
-  protected Binding(String provideKey, String membersKey, boolean singleton, Object requiredBy) {
+  protected Binding(@Nullable String provideKey, @Nullable String membersKey, boolean singleton, @Nullable Object requiredBy) {
     if (singleton && provideKey == null) {
       throw new IllegalArgumentException();
     }

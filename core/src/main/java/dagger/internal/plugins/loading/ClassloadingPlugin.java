@@ -21,6 +21,8 @@ import dagger.internal.Plugin;
 import dagger.internal.StaticInjection;
 import java.lang.reflect.Constructor;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * A runtime {@link Plugin} that loads generated classes.
  */
@@ -29,7 +31,7 @@ public final class ClassloadingPlugin implements Plugin {
   public static final String MODULE_ADAPTER_SUFFIX = "$ModuleAdapter";
   public static final String STATIC_INJECTION_SUFFIX = "$StaticInjection";
 
-  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, T module) {
+  @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<? extends T> moduleClass, @Nullable T module) {
     return instantiate(moduleClass.getName(), MODULE_ADAPTER_SUFFIX);
   }
 

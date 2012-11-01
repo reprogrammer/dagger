@@ -36,7 +36,10 @@
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>types.checkers</groupId>
+      <artifactId>checkers-quals</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

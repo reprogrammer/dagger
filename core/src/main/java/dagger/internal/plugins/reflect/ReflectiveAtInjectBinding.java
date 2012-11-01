@@ -30,6 +30,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import checkers.nullness.quals.Nullable;
+
+
 /**
  * Injects the {@code @Inject}-annotated fields and constructors of a class
  * using reflection.
@@ -37,11 +40,11 @@ import javax.inject.Singleton;
 final class ReflectiveAtInjectBinding<T> extends Binding<T> {
   private final Field[] fields;
   private final Constructor<T> constructor;
-  private final Class<?> supertype;
+  private final @Nullable Class<?> supertype;
   private final String[] keys;
-  private final Binding<?>[] fieldBindings;
-  private final Binding<?>[] parameterBindings;
-  private Binding<? super T> supertypeBinding;
+  private final @Nullable Binding<?>[] fieldBindings;
+  private final @Nullable Binding<?>[] parameterBindings;
+  private @Nullable Binding<? super T> supertypeBinding;
 
   /**
    * @param keys keys for the fields, constructor parameters and supertype in
@@ -53,7 +56,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
    */
   private ReflectiveAtInjectBinding(String provideKey, String membersKey, boolean singleton,
       Class<?> type, Field[] fields, Constructor<T> constructor, int parameterCount,
-      Class<?> supertype, String[] keys) {
+      @Nullable Class<?> supertype, String[] keys) {
     super(provideKey, membersKey, singleton, type);
     this.constructor = constructor;
     this.fields = fields;
@@ -91,6 +94,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
     }
     Object[] args = new Object[parameterBindings.length];
     for (int i = 0; i < parameterBindings.length; i++) {
+      assert parameterBindings[i] != null : "@SuppressWarnings(nullness)";
       args[i] = parameterBindings[i].get();
     }
     T result;
@@ -110,6 +114,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
   @Override public void injectMembers(T t) {
     try {
       for (int i = 0; i < fields.length; i++) {
+    	assert fieldBindings[i] != null : "@SuppressWarnings(nullness)";
         fields[i].set(t, fieldBindings[i].get());
       }
       if (supertypeBinding != null) {
@@ -122,11 +127,13 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
 
   @Override public void getDependencies(Set<Binding<?>> get, Set<Binding<?>> injectMembers) {
     if (parameterBindings != null) {
-      for (Binding<?> binding : parameterBindings) {
+      for (@Nullable Binding<?> binding : parameterBindings) {
+    	assert binding != null : "@SuppressWarnings(nullness)";
         get.add(binding);
       }
     }
-    for (Binding<?> binding : fieldBindings) {
+    for (@Nullable Binding<?> binding : fieldBindings) {
+      assert binding != null : "@SuppressWarnings(nullness)";
       injectMembers.add(binding);
     }
     if (supertypeBinding != null) {
@@ -135,7 +142,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
   }
 
   @Override public String toString() {
-    return provideKey != null ? provideKey : membersKey;
+    return provideKey != null ? provideKey : (membersKey != null ? membersKey : "null");
   }
 
   /**
@@ -148,7 +155,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
 
     // Lookup the injectable fields and their corresponding keys.
     List<Field> injectedFields = new ArrayList<Field>();
-    for (Class<?> c = type; c != Object.class; c = c.getSuperclass()) {
+    for (Class<?> c = type; c != null && c != Object.class; c = c.getSuperclass()) {
       for (Field field : c.getDeclaredFields()) {
         if (!field.isAnnotationPresent(Inject.class) || Modifier.isStatic(field.getModifiers())) {
           continue;

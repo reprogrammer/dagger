@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import org.junit.Test;
 
+import checkers.nullness.quals.Nullable;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -58,7 +60,7 @@ public final class InjectionOfLazyTest {
     }
     @Module(entryPoints = TestEntryPoint.class)
     class TestModule {
-      @Provides String provideInteger() {
+      @Provides @Nullable String provideInteger() {
         provideCounter.incrementAndGet();
         return null;
       }

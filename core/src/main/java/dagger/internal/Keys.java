@@ -26,6 +26,8 @@ import java.util.Set;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Formats strings that identify the value to be injected. Keys are of one of
  * three forms:
@@ -67,7 +69,7 @@ public final class Keys {
   }
 
   /** Returns a key for {@code type} annotated by {@code annotation}. */
-  public static String get(Type type, Annotation annotation) {
+  public static String get(Type type, @Nullable Annotation annotation) {
     type = boxIfPrimitive(type);
     if (annotation == null && type instanceof Class && !((Class<?>) type).isArray()) {
       return ((Class<?>) type).getName();
@@ -115,11 +117,13 @@ public final class Keys {
    * Validates that among {@code annotations} there exists only one annotation which is, itself
    * qualified by {@code \@Qualifier}
    */
-  private static Annotation extractQualifier(Annotation[] annotations,
+  private static @Nullable Annotation extractQualifier(Annotation[] annotations,
       Object subject) {
     Annotation qualifier = null;
     for (Annotation a : annotations) {
-      if (!IS_QUALIFIER_ANNOTATION.get(a.annotationType())) {
+      @Nullable Boolean isQualifierAnnotation = IS_QUALIFIER_ANNOTATION.get(a.annotationType());
+      assert isQualifierAnnotation != null : "@SuppressWarnings(nullness)";
+      if (!isQualifierAnnotation) {
         continue;
       }
       if (qualifier != null) {
@@ -176,7 +180,7 @@ public final class Keys {
    * key for {@code Foo}. This retains annotations and supports both Provider
    * keys and MembersInjector keys.
    */
-  static String getBuiltInBindingsKey(String key) {
+  static @Nullable String getBuiltInBindingsKey(String key) {
     int start = startOfType(key);
     if (substringStartsWith(key, start, PROVIDER_PREFIX)) {
       return extractKey(key, start, key.substring(0, start), PROVIDER_PREFIX);
@@ -192,7 +196,7 @@ public final class Keys {
    * if this is a key for a {@code Lazy<Foo>}, this returns the key for
    * {@code Foo}. This retains annotations.
    */
-  static String getLazyKey(String key) {
+  static @Nullable String getLazyKey(String key) {
     int start = startOfType(key);
     if (substringStartsWith(key, start, LAZY_PREFIX)) {
       return extractKey(key, start, key.substring(0, start), LAZY_PREFIX);
@@ -247,7 +251,7 @@ public final class Keys {
    * class instance. Returns null if {@code key} represents a parameterized type
    * or an array type.
    */
-  public static String getClassName(String key) {
+  public static @Nullable String getClassName(String key) {
     int start = 0;
     if (key.startsWith("@") || key.startsWith("members/")) {
       start = key.lastIndexOf('/') + 1;

@@ -18,6 +18,8 @@ package dagger.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import checkers.nullness.quals.Nullable;
+
 /**
  * Private copy of {@code android.util.LruCache}.
  */
@@ -53,12 +55,12 @@ class LruCache<K, V> {
    * head of the queue. This returns null if a value is not cached and cannot
    * be created.
    */
-  public final V get(K key) {
+  public final @Nullable V get(K key) {
     if (key == null) {
       throw new NullPointerException("key == null");
     }
 
-    V mapValue;
+    @Nullable V mapValue;
     synchronized (this) {
       mapValue = map.get(key);
       if (mapValue != null) {
@@ -75,7 +77,7 @@ class LruCache<K, V> {
     * the map and release the created value.
     */
 
-    V createdValue = create(key);
+    @Nullable V createdValue = create(key);
     if (createdValue == null) {
       return null;
     }
@@ -107,12 +109,12 @@ class LruCache<K, V> {
    *
    * @return the previous value mapped by {@code key}.
    */
-  public final V put(K key, V value) {
+  public final @Nullable V put(K key, V value) {
     if (key == null || value == null) {
       throw new NullPointerException("key == null || value == null");
     }
 
-    V previous;
+    @Nullable V previous;
     synchronized (this) {
       putCount++;
       size += safeSizeOf(key, value);
@@ -165,12 +167,12 @@ class LruCache<K, V> {
    *
    * @return the previous value mapped by {@code key}.
    */
-  public final V remove(K key) {
+  public final @Nullable V remove(K key) {
     if (key == null) {
       throw new NullPointerException("key == null");
     }
 
-    V previous;
+    @Nullable V previous;
     synchronized (this) {
       previous = map.remove(key);
       if (previous != null) {
@@ -200,7 +202,7 @@ class LruCache<K, V> {
    *     this removal was caused by a {@link #put}. Otherwise it was caused by
    *     an eviction or a {@link #remove}.
    */
-  protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {
+  protected void entryRemoved(boolean evicted, K key, V oldValue, @Nullable V newValue) {
   }
 
   /**
@@ -218,7 +220,7 @@ class LruCache<K, V> {
    * thread calls {@link #put} while another is creating a value for the same
    * key.
    */
-  protected V create(K key) {
+  protected @Nullable V create(K key) {
     return null;
   }
 
