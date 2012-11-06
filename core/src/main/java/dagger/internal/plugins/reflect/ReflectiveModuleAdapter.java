@@ -125,7 +125,7 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
     @Override public T get() {
       Object[] args = new Object[parameters.length];
       for (int i = 0; i < parameters.length; i++) {
-    	assert parameters[i] != null : "@SuppressWarnings(nullness)";
+        assert parameters[i] != null : "@SuppressWarnings(nullness)";
         args[i] = parameters[i].get();
       }
       try {
@@ -139,7 +139,7 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
 
     @Override public void getDependencies(Set<Binding<?>> get, Set<Binding<?>> injectMembers) {
       for (@Nullable Binding<?> binding : parameters) {
-    	assert binding != null : "@SuppressWarnings(nullness)";
+        assert binding != null : "@SuppressWarnings(nullness)";
         get.add(binding);
       }
     }

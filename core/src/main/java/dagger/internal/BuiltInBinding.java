@@ -41,7 +41,7 @@ final class BuiltInBinding<T> extends Binding<T> {
 
   @SuppressWarnings("unchecked") // At runtime we know 'T' is a Provider or MembersInjector.
   @Override public T get() {
-	assert delegate != null : "@SuppressWarnings(nullness)";
+    assert delegate != null : "@SuppressWarnings(nullness)";
     return (T) delegate;
   }
 

@@ -128,7 +128,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
   @Override public void getDependencies(Set<Binding<?>> get, Set<Binding<?>> injectMembers) {
     if (parameterBindings != null) {
       for (@Nullable Binding<?> binding : parameterBindings) {
-    	assert binding != null : "@SuppressWarnings(nullness)";
+        assert binding != null : "@SuppressWarnings(nullness)";
         get.add(binding);
       }
     }
