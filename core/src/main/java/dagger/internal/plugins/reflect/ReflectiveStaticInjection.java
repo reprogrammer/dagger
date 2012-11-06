@@ -46,7 +46,7 @@ final class ReflectiveStaticInjection extends StaticInjection {
   @Override public void inject() {
     try {
       for (int f = 0; f < fields.length; f++) {
-    	assert bindings[f] != null : "@SuppressWarnings(nullness)";
+        assert bindings[f] != null : "@SuppressWarnings(nullness)";
         fields[f].set(null, bindings[f].get());
       }
     } catch (IllegalAccessException e) {
