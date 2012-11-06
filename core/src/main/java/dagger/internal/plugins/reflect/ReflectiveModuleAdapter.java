@@ -59,7 +59,6 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
     for (Class<?> c = moduleClass; c != null && c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Provides.class)) {
-          @SuppressWarnings("nullness")
           String key = Keys.get(method.getGenericReturnType(), method.getAnnotations(), method);
           if (method.isAnnotationPresent(OneOf.class)) {
             handleSetBindings(bindings, method, key);
@@ -76,7 +75,6 @@ final class ReflectiveModuleAdapter extends ModuleAdapter<Object> {
   }
 
   private <T> void handleSetBindings(Map<String, Binding<?>> bindings, Method method, String key) {
-	@SuppressWarnings("nullness")
     String elementKey =
         Keys.getElementKey(method.getGenericReturnType(), method.getAnnotations(), method);
     SetBinding.<T>add(bindings, elementKey, new ProviderMethodBinding<T>(method, key, module));

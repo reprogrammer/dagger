@@ -114,7 +114,7 @@ final class ReflectiveAtInjectBinding<T> extends Binding<T> {
   @Override public void injectMembers(T t) {
     try {
       for (int i = 0; i < fields.length; i++) {
-    	assert fieldBindings[i] != null : "@SuppressWarnings(nullness)";
+        assert fieldBindings[i] != null : "@SuppressWarnings(nullness)";
         fields[i].set(t, fieldBindings[i].get());
       }
       if (supertypeBinding != null) {
